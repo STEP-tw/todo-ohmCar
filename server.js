@@ -20,7 +20,7 @@ let registeredUsers=[
 ];
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
-  if(req.urlIsOneOf(['/index.html','/logout']) && !req.user){
+  if(req.urlIsOneOf(['/index.html','/createTodo.html']) && !req.user){
     res.redirect('/login.html');
   }
 }
@@ -45,7 +45,9 @@ let loadUser = (req,res)=>{
 
 const serveFile=function(req,res){
   try {
-    if(req.url=='/login.html') return;
+    if(req.urlIsOneOf(['/login.html','/createTodo.html'])){
+      return;
+    }
     if(doesExist(req)){
       setHeader(req,res);
       res.write(fs.readFileSync('./public'+req.url));
@@ -75,6 +77,18 @@ app.post('/login.html',(req,res)=>{
   res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
   user.sessionid = sessionid;
   res.redirect('/index.html');
+});
+
+app.get('/createTodo.html',(req,res)=>{
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/createTodo.html'));
+  res.end();
+});
+
+app.post('/createTodo.html',(req,res)=>{
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/createTodo.html'));
+  res.end();
 });
 
 app.get('/index.html',(req,res)=>{
