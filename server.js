@@ -44,7 +44,20 @@ let loadUser = (req,res)=>{
   }
 };
 
-const serveFile=function(req,res){
+const showTodo=(req,res)=>{
+  res.setHeader('Content-type','text/html');
+  todoData.forEach(data=>{
+    if(req.url==`/${data.title}`){
+      res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
+      res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
+      res.write(`<a href="/logout"> Logout </a> <br/>`);
+      res.write(`<a href="/index.html"> Home </a>`);
+      res.end();
+    }
+  });
+}
+
+const serveFile=(req,res)=>{
   try {
     if(req.urlIsOneOf(['/login.html','/createTodo.html'])){
       return;
@@ -90,15 +103,27 @@ app.post('/createTodo.html',(req,res)=>{
   req.body.userName=req.user.userName;
   todoData.push(req.body);
   fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-    err=>{
-      if(err)return;
-    });
+  err=>{
+    if(err)return;
+  });
   res.redirect('/index.html');
 });
 
 app.get('/index.html',(req,res)=>{
   let indexPage=fs.readFileSync('./templates/index.html').toString();
   let homePage=indexPage.replace('User',`User : ${req.user.userName}`);
+  res.setHeader('Content-type','text/html');
+  let user=todoData.find(u=>{
+    return u.userName==req.user.userName;
+  });
+  if(user){
+    res.write(`Your Todo Lists are :<br/>`);
+    todoData.forEach(data=>{
+      if(data.userName==req.user.userName){
+        res.write(`<a href="/${data.title}">${data.title}</a><br/>`);
+      };
+    });
+  }
   res.write(homePage);
   res.end();
 });
@@ -111,6 +136,7 @@ app.get('/logout',(req,res)=>{
   res.redirect('/login.html');
 });
 
+app.use(showTodo);
 app.use(loadUser);
 app.use(redirectNotLoggedInUserToLogin);
 app.use(serveFile);
