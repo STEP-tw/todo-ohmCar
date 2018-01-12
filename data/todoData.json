@@ -1,14 +1,14 @@
 [
   {
+    "title": "todo",
+    "description": "this+todo+is+for+making+todo+app",
+    "item": "make+a+app+to+write+down+a+todo",
+    "userName": "ketan"
+  },
+  {
     "title": "flowerCatalog",
     "description": "this+todo+is+for+making+the+flowerCatalog+website",
     "item": "handling+404",
-    "userName": "omkar"
-  },
-  {
-    "title": "hello",
-    "description": "this+is+a+hello+text",
-    "item": "writing+a+function+to+display+hello",
     "userName": "omkar"
   }
 ]

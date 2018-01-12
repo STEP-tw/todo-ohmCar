@@ -1,7 +1,7 @@
 const fs=require('fs');
 
 const WebApp = require('./webapp.js');
-const todoData=require('./data/todoData.json');
+let todoData=require('./data/todoData.json');
 
 const app=WebApp.create();
 
@@ -51,6 +51,7 @@ const showTodo=(req,res)=>{
       res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
       res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
       res.write(`<p>Todo Items: ${data.item.replace(/\+/g,' ')}</p>`);
+      res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
       res.write(`<a href="/logout"> Logout </a> <br/>`);
       res.write(`<a href="/index.html"> Home </a> <br/>`);
       res.end();
@@ -58,8 +59,28 @@ const showTodo=(req,res)=>{
   });
 }
 
+const deleteTodo=(req,res)=>{
+  let todoToDelete=null;
+  todoData.map(data=>{
+    if(req.url==`/delete${data.title}`){
+      todoToDelete=data;
+    }
+  });
+  if(todoToDelete!=null){
+    todoData=todoData.filter(data=>{
+      return data!=todoToDelete;
+    });
+    fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+    err=>{
+      if(err)return;
+    });
+    res.redirect('/index.html');
+  }
+}
+
 const serveFile=(req,res)=>{
   try {
+    if(req.url=='/') res.redirect('/index.html');
     if(req.urlIsOneOf(['/login.html','/createTodo.html'])){
       return;
     }
@@ -137,6 +158,7 @@ app.get('/logout',(req,res)=>{
   res.redirect('/login.html');
 });
 
+app.use(deleteTodo);
 app.use(showTodo);
 app.use(loadUser);
 app.use(redirectNotLoggedInUserToLogin);
