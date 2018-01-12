@@ -37,7 +37,8 @@ const setHeader=function(req,res){
 
 let loadUser = (req,res)=>{
   let sessionid = req.cookies.sessionid;
-  let user = registeredUsers.find(u=>u.sessionid==sessionid);
+  let users = JSON.stringify(registeredUsers);
+  let user = JSON.parse(users).find(u=>u.sessionid==sessionid);
   if(sessionid && user){
     req.user = user;
   }
@@ -49,8 +50,9 @@ const showTodo=(req,res)=>{
     if(req.url==`/${data.title}`){
       res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
       res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
+      res.write(`<p>Todo Items: ${data.item.replace(/\+/g,' ')}</p>`);
       res.write(`<a href="/logout"> Logout </a> <br/>`);
-      res.write(`<a href="/index.html"> Home </a>`);
+      res.write(`<a href="/index.html"> Home </a> <br/>`);
       res.end();
     }
   });
