@@ -19,6 +19,12 @@ let registeredUsers=[
   {userName:'ketan',password:'ketan'}
 ];
 
+let redirectNotLoggedInUserToLogin = (req,res)=>{
+  if(req.urlIsOneOf(['/index.html','/logout']) && !req.user){
+    res.redirect('/login.html');
+  }
+}
+
 const doesExist=req=>{
   return fs.existsSync('./public'+req.url);
 }
@@ -60,7 +66,6 @@ app.post('/login.html',(req,res)=>{
   let user = registeredUsers.find(u=>{
     return u.userName==req.body.userName && u.password==req.body.password;
   });
-  console.log(user);
   if(!user){
     res.setHeader('Set-Cookie',`logInFailed=true`);
     res.redirect('/login.html');
@@ -72,7 +77,15 @@ app.post('/login.html',(req,res)=>{
   res.redirect('/index.html');
 });
 
+app.get('/index.html',(req,res)=>{
+  let indexPage=fs.readFileSync('./templates/index.html').toString();
+  let homePage=indexPage.replace('User',`User : ${req.user.userName}`);
+  res.write(homePage);
+  res.end();
+});
+
 app.use(loadUser);
+app.use(redirectNotLoggedInUserToLogin);
 app.use(serveFile);
 
 const PORT=9000;
