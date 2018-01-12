@@ -15,8 +15,8 @@ const headers={
 };
 
 let registeredUsers=[
-  {username:'omkar',password:'omkar'},
-  {username:'ketan',password:'ketan'}
+  {userName:'omkar',password:'omkar'},
+  {userName:'ketan',password:'ketan'}
 ];
 
 const doesExist=req=>{
@@ -29,8 +29,17 @@ const setHeader=function(req,res){
   res.setHeader("Content-type",headers[extensionOfFile]);
 };
 
+let loadUser = (req,res)=>{
+  let sessionid = req.cookies.sessionid;
+  let user = registeredUsers.find(u=>u.sessionid==sessionid);
+  if(sessionid && user){
+    req.user = user;
+  }
+};
+
 const serveFile=function(req,res){
   try {
+    if(req.url=='/login.html') return;
     if(doesExist(req)){
       setHeader(req,res);
       res.write(fs.readFileSync('./public'+req.url));
@@ -41,6 +50,29 @@ const serveFile=function(req,res){
   }
 }
 
+app.get('/login.html',(req,res)=>{
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/login.html'));
+  res.end();
+});
+
+app.post('/login.html',(req,res)=>{
+  let user = registeredUsers.find(u=>{
+    return u.userName==req.body.userName && u.password==req.body.password;
+  });
+  console.log(user);
+  if(!user){
+    res.setHeader('Set-Cookie',`logInFailed=true`);
+    res.redirect('/login.html');
+    return;
+  }
+  let sessionid = new Date().getTime();
+  res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
+  user.sessionid = sessionid;
+  res.redirect('/index.html');
+});
+
+app.use(loadUser);
 app.use(serveFile);
 
 const PORT=9000;
