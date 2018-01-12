@@ -51,6 +51,7 @@ const showTodo=(req,res)=>{
       res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
       res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
       res.write(`<p>Todo Items: ${data.item.replace(/\+/g,' ')}</p>`);
+      res.write(`<a href="/edit${data.title}"> Edit This Todo </a> <br/>`);
       res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
       res.write(`<a href="/logout"> Logout </a> <br/>`);
       res.write(`<a href="/index.html"> Home </a> <br/>`);
