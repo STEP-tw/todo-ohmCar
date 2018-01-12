@@ -84,6 +84,14 @@ app.get('/index.html',(req,res)=>{
   res.end();
 });
 
+app.get('/logout',(req,res)=>{
+  if(req.user){
+    res.setHeader('Set-Cookie',[`loginFailed=false,Expires=${new Date(1).toUTCString()}`,`sessionid=0,Expires=${new Date(1).toUTCString()}`]);
+    delete req.user.sessionid;
+  }
+  res.redirect('/login.html');
+});
+
 app.use(loadUser);
 app.use(redirectNotLoggedInUserToLogin);
 app.use(serveFile);
