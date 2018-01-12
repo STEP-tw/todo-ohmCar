@@ -2,6 +2,7 @@ const http=require('http');
 const fs=require('fs');
 
 const WebApp = require('./webapp.js');
+const todoData=require('./data/todoData.json');
 
 const app=WebApp.create();
 
@@ -86,9 +87,13 @@ app.get('/createTodo.html',(req,res)=>{
 });
 
 app.post('/createTodo.html',(req,res)=>{
-  res.setHeader('Content-type','text/html');
-  res.write(fs.readFileSync('./public/createTodo.html'));
-  res.end();
+  req.body.userName=req.user.userName;
+  todoData.push(req.body);
+  fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+    err=>{
+      if(err)return;
+    });
+  res.redirect('/index.html');
 });
 
 app.get('/index.html',(req,res)=>{
