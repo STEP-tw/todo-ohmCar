@@ -25,6 +25,12 @@ let redirectNotLoggedInUserToLogin = (req,res)=>{
   }
 }
 
+const checkingIfUserIsLoggedin=(data)=>{
+  return registeredUsers.find(u=>{
+    return u.sessionid&&u.userName==data.userName;
+  });
+}
+
 const replaceValueToEdit=(valueToReplace,file,name)=>{
   file=file.replace(
     `<input type="text" name="${name}" value="" required/>`,
@@ -55,9 +61,7 @@ let loadUser = (req,res)=>{
 const viewTodo=(req,res)=>{
   res.setHeader('Content-type','text/html');
   todoData.forEach(data=>{
-    if(registeredUsers.find(u=>{
-      return u.sessionid&&u.userName==data.userName;
-    })){
+    if(checkingIfUserIsLoggedin(data)){
       if(req.url==`/${data.title}`){
         res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
         res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
@@ -77,9 +81,7 @@ const viewTodo=(req,res)=>{
 const deleteTodo=(req,res)=>{
   let todoToDelete=null;
   todoData.map(data=>{
-    if(registeredUsers.find(u=>{
-      return u.sessionid&&u.userName==data.userName;
-    })){
+    if(checkingIfUserIsLoggedin(data)){
       if(req.url==`/delete${data.title}`){
         todoToDelete=data;
       }
@@ -99,9 +101,7 @@ const deleteTodo=(req,res)=>{
 
 const editTodo=(req,res)=>{
   todoData.forEach(data=>{
-    if(registeredUsers.find(u=>{
-      return u.sessionid&&u.userName==data.userName;
-    })){
+    if(checkingIfUserIsLoggedin(data)){
       if(req.url==`/edit${data.title}`){
         if(req.method=='GET'){
           let createTodoFile=fs.readFileSync('./public/createTodo.html').toString();
@@ -127,9 +127,7 @@ const editTodo=(req,res)=>{
 
 const editTodoItem=(req,res)=>{
   todoData.forEach(data=>{
-    if(registeredUsers.find(u=>{
-      return u.sessionid&&u.userName==data.userName;
-    })){
+    if(checkingIfUserIsLoggedin(data)){
       if(req.url==`/edit${data.item}`){
         if(req.method=='GET'){
           res.setHeader('Content-Type','text/html');
