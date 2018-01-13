@@ -20,13 +20,13 @@ let registeredUsers=[
 ];
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
-  if(req.urlIsOneOf(['/index.html','/createTodo.html']) && !req.user){
+  if(req.urlIsOneOf(['/index.html','/createTodo.html','/']) && !req.user){
     res.redirect('/login.html');
   }
 }
 
 let redirectLoggedinUserToHome = (req,res)=>{
-  if(req.urlIsOneOf(['/login.html']) && req.user){
+  if(req.urlIsOneOf(['/login.html','/']) && req.user){
     res.redirect('/index.html');
   }
 }
@@ -178,7 +178,6 @@ const editTodoItem=(req,res)=>{
 
 const serveFile=(req,res)=>{
   try {
-    if(req.url=='/') res.redirect('/index.html');
     if(req.urlIsOneOf(['/login.html','/createTodo.html'])){
       return;
     }
