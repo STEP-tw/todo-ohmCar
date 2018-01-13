@@ -1,11 +1,5 @@
 [
   {
-    "title": "todo",
-    "description": "this+todo+is+for+making+todo+app",
-    "item": "make+a+app+to+write+down+a+todo",
-    "userName": "ketan"
-  },
-  {
     "title": "bye",
     "description": "this+is+a+bye+text",
     "item": "writing+a+function+to+display+bye",
@@ -16,6 +10,12 @@
     "description": "this+is+a+hello+text",
     "item": "function+to+return+a+hello+text",
     "userName": "omkar"
+  },
+  {
+    "title": "todo",
+    "description": "this+todo+is+for+making+the+todo+app",
+    "item": "make+a+app+to+write+down+a+todo",
+    "userName": "ketan"
   },
   {
     "title": "flowerCatalog",

@@ -55,17 +55,21 @@ let loadUser = (req,res)=>{
 const viewTodo=(req,res)=>{
   res.setHeader('Content-type','text/html');
   todoData.forEach(data=>{
-    if(req.url==`/${data.title}`){
-      res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
-      res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
-      res.write(
-        `<p>Todo Items: <br/>${data.item.replace(/\+/g,' ')} <a href="/edit${data.item}"> Edit</a></p>`
-      );
-      res.write(`<a href="/edit${data.title}"> Edit This Todo </a> <br/>`);
-      res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
-      res.write(`<a href="/logout"> Logout </a> <br/>`);
-      res.write(`<a href="/index.html"> Home </a> <br/>`);
-      res.end();
+    if(registeredUsers.find(u=>{
+      return u.sessionid&&u.userName==data.userName;
+    })){
+      if(req.url==`/${data.title}`){
+        res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
+        res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
+        res.write(
+          `<p>Todo Items: <br/>${data.item.replace(/\+/g,' ')} <a href="/edit${data.item}"> Edit</a></p>`
+        );
+        res.write(`<a href="/edit${data.title}"> Edit This Todo </a> <br/>`);
+        res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
+        res.write(`<a href="/logout"> Logout </a> <br/>`);
+        res.write(`<a href="/index.html"> Home </a> <br/>`);
+        res.end();
+      }
     }
   });
 }
@@ -73,8 +77,12 @@ const viewTodo=(req,res)=>{
 const deleteTodo=(req,res)=>{
   let todoToDelete=null;
   todoData.map(data=>{
-    if(req.url==`/delete${data.title}`){
-      todoToDelete=data;
+    if(registeredUsers.find(u=>{
+      return u.sessionid&&u.userName==data.userName;
+    })){
+      if(req.url==`/delete${data.title}`){
+        todoToDelete=data;
+      }
     }
   });
   if(todoToDelete!=null){
@@ -91,23 +99,27 @@ const deleteTodo=(req,res)=>{
 
 const editTodo=(req,res)=>{
   todoData.forEach(data=>{
-    if(req.url==`/edit${data.title}`){
-      if(req.method=='GET'){
-        let createTodoFile=fs.readFileSync('./public/createTodo.html').toString();
-        createTodoFile=replaceValueToEdit(data.title,createTodoFile,'title');
-        createTodoFile=replaceValueToEdit(data.description,createTodoFile,'description');
-        createTodoFile=replaceValueToEdit(data.item,createTodoFile,'item');
-        res.write(createTodoFile);
-        res.end();
-      } else{
-        data.title=req.body.title;
-        data.description=req.body.description;
-        data.item=req.body.item;
-        fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-        err=>{
-          if(err)return;
-        });
-        res.redirect('/index.html');
+    if(registeredUsers.find(u=>{
+      return u.sessionid&&u.userName==data.userName;
+    })){
+      if(req.url==`/edit${data.title}`){
+        if(req.method=='GET'){
+          let createTodoFile=fs.readFileSync('./public/createTodo.html').toString();
+          createTodoFile=replaceValueToEdit(data.title,createTodoFile,'title');
+          createTodoFile=replaceValueToEdit(data.description,createTodoFile,'description');
+          createTodoFile=replaceValueToEdit(data.item,createTodoFile,'item');
+          res.write(createTodoFile);
+          res.end();
+        } else{
+          data.title=req.body.title;
+          data.description=req.body.description;
+          data.item=req.body.item;
+          fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+          err=>{
+            if(err)return;
+          });
+          res.redirect('/index.html');
+        }
       }
     }
   });
@@ -115,22 +127,26 @@ const editTodo=(req,res)=>{
 
 const editTodoItem=(req,res)=>{
   todoData.forEach(data=>{
-    if(req.url==`/edit${data.item}`){
-      if(req.method=='GET'){
-        res.setHeader('Content-Type','text/html');
-        res.write(
-          `<form method="POST">
-          Edit Todo Item: <input type="text" name="item" value="${data.item}">
-          <input type="submit"></form>`
-        );
-        res.end();
-      } else{
-        data.item=req.body.item;
-        fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-        err=>{
-          if(err)return;
-        });
-        res.redirect(`/${data.title}`);
+    if(registeredUsers.find(u=>{
+      return u.sessionid&&u.userName==data.userName;
+    })){
+      if(req.url==`/edit${data.item}`){
+        if(req.method=='GET'){
+          res.setHeader('Content-Type','text/html');
+          res.write(
+            `<form method="POST">
+            Edit Todo Item: <input type="text" name="item" value="${data.item}">
+            <input type="submit"></form>`
+          );
+          res.end();
+        } else{
+          data.item=req.body.item;
+          fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+          err=>{
+            if(err)return;
+          });
+          res.redirect(`/${data.title}`);
+        }
       }
     }
   });
