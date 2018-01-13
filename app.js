@@ -203,7 +203,9 @@ app.post('/login.html',(req,res)=>{
   });
   if(!user){
     res.setHeader('Set-Cookie',`logInFailed=true`);
-    res.redirect('/login.html');
+    res.write(`Wrong Username or Password! <br/>`);
+    res.write(fs.readFileSync('./public/login.html'));
+    res.end();
     return;
   }
   let sessionid = new Date().getTime();
