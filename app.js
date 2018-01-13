@@ -25,6 +25,19 @@ let redirectNotLoggedInUserToLogin = (req,res)=>{
   }
 }
 
+let redirectLoggedinUserToHome = (req,res)=>{
+  if(req.urlIsOneOf(['/login.html']) && req.user){
+    res.redirect('/index.html');
+  }
+}
+
+const writeData=function(){
+  fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+  err=>{
+    if(err)return;
+  });
+}
+
 const checkingIfUserIsLoggedin=(data)=>{
   return registeredUsers.find(u=>{
     return u.sessionid&&u.userName==data.userName;
@@ -91,10 +104,7 @@ const deleteTodo=(req,res)=>{
     todoData=todoData.filter(data=>{
       return data!=todoToDelete;
     });
-    fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-    err=>{
-      if(err)return;
-    });
+    writeData();
     res.redirect('/index.html');
   }
 }
@@ -114,10 +124,7 @@ const editTodo=(req,res)=>{
           data.title=req.body.title;
           data.description=req.body.description;
           data.item=req.body.item;
-          fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-          err=>{
-            if(err)return;
-          });
+          writeData();
           res.redirect('/index.html');
         }
       }
@@ -131,18 +138,13 @@ const editTodoItem=(req,res)=>{
       if(req.url==`/edit${data.item}`){
         if(req.method=='GET'){
           res.setHeader('Content-Type','text/html');
-          res.write(
-            `<form method="POST">
-            Edit Todo Item: <input type="text" name="item" value="${data.item}">
-            <input type="submit"></form>`
-          );
+          res.write(`<form method="POST">
+          Edit Todo Item: <input type="text" name="item" value="${data.item}">
+          <input type="submit"></form>`);
           res.end();
         } else{
           data.item=req.body.item;
-          fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-          err=>{
-            if(err)return;
-          });
+          writeData();
           res.redirect(`/${data.title}`);
         }
       }
@@ -196,10 +198,7 @@ app.get('/createTodo.html',(req,res)=>{
 app.post('/createTodo.html',(req,res)=>{
   req.body.userName=req.user.userName;
   todoData.push(req.body);
-  fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
-  err=>{
-    if(err)return;
-  });
+  writeData();
   res.redirect('/index.html');
 });
 
@@ -235,7 +234,8 @@ app.use(editTodoItem);
 app.use(deleteTodo);
 app.use(viewTodo);
 app.use(loadUser);
-app.use(redirectNotLoggedInUserToLogin);
 app.use(serveFile);
+app.use(redirectNotLoggedInUserToLogin);
+app.use(redirectLoggedinUserToHome);
 
 module.exports=app;
