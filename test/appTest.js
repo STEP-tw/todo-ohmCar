@@ -18,7 +18,7 @@ describe('app',()=>{
     it('serves the login page',done=>{
       request(app,{method:'GET',url:'/login.html'},res=>{
         th.status_is_ok(res);
-        th.body_contains(res,'Name:');
+        th.body_contains(res,'Username:');
         th.body_does_not_contain(res,'login failed');
         th.should_not_have_cookie(res,'message');
         done();
@@ -32,6 +32,14 @@ describe('app',()=>{
         assert.equal(res.statusCode,302);
         th.should_be_redirected_to(res,'/index.html');
         th.should_not_have_cookie(res,'message');
+        done();
+      })
+    })
+    it('gives login page for invalid user with message',done=>{
+      request(app,{method:'POST',url:'/login.html',body:'userName=xyz&password=xyz'},res=>{
+        th.status_is_ok(res);
+        th.should_not_have_cookie(res,'message');
+        th.body_contains(res,'Wrong');
         done();
       })
     })
