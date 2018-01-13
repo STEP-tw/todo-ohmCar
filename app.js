@@ -71,6 +71,22 @@ let loadUser = (req,res)=>{
   }
 };
 
+const checkIfDoneOrNot=(req,res)=>{
+  todoData.forEach(data=>{
+    if(checkingIfUserIsLoggedin(data)){
+      if(req.url==`/done${data.title}`){
+        data.done="true";
+        writeData();
+        res.redirect(`/${data.title}`);
+      } else if(req.url==`/notDone${data.title}`){
+        data.done="false";
+        writeData();
+        res.redirect(`/${data.title}`);
+      }
+    }
+  })
+}
+
 const viewTodo=(req,res)=>{
   res.setHeader('Content-type','text/html');
   todoData.forEach(data=>{
@@ -78,9 +94,17 @@ const viewTodo=(req,res)=>{
       if(req.url==`/${data.title}`){
         res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
         res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
-        res.write(
-          `<p>Todo Items: <br/>${data.item.replace(/\+/g,' ')} <a href="/edit${data.item}"> Edit</a></p>`
-        );
+        if(data.done=="true"){
+          res.write(
+            `<p>Todo Items: <br/> <input type="checkbox" checked>
+            ${data.item.replace(/\+/g,' ')} <a href="/edit${data.item}"> Edit</a></p><p><a href="/done${data.title}"> Done</a> <br/><a href="/notDone${data.title}">  Not Done</a></p>`
+          );
+        } else{
+          res.write(
+            `<p>Todo Items: <br/> <input type="checkbox">
+            ${data.item.replace(/\+/g,' ')} <a href="/edit${data.item}"> Edit</a></p><p><a href="/done${data.title}"> Done</a> <br/><a href="/notDone${data.title}">  Not Done</a></p>`
+          );
+        }
         res.write(`<a href="/edit${data.title}"> Edit This Todo </a> <br/>`);
         res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
         res.write(`<a href="/logout"> Logout </a> <br/>`);
@@ -197,6 +221,7 @@ app.get('/createTodo.html',(req,res)=>{
 
 app.post('/createTodo.html',(req,res)=>{
   req.body.userName=req.user.userName;
+  req.body.done=false;
   todoData.push(req.body);
   writeData();
   res.redirect('/index.html');
@@ -229,6 +254,7 @@ app.get('/logout',(req,res)=>{
   res.redirect('/login.html');
 });
 
+app.use(checkIfDoneOrNot);
 app.use(editTodo);
 app.use(editTodoItem);
 app.use(deleteTodo);
