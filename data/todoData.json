@@ -6,15 +6,21 @@
     "userName": "ketan"
   },
   {
-    "title": "flowerCatalog",
-    "description": "this+todo+is+for+making+the+flowerCatalog+website",
-    "item": "handling+404",
-    "userName": "omkar"
+    "title": "bye",
+    "description": "this+is+a+bye+text",
+    "item": "writing+a+function+to+display+bye",
+    "userName": "ketan"
   },
   {
     "title": "hello",
-    "description": "it+is+a+hello+text",
-    "item": "writing+a+function+to+display+hello",
+    "description": "this+is+a+hello+text",
+    "item": "function+returning+hello+text",
+    "userName": "omkar"
+  },
+  {
+    "title": "flowerCatalog",
+    "description": "this+todo+is+for+making+the+flowerCatalog+website",
+    "item": "handling+404",
     "userName": "omkar"
   }
 ]

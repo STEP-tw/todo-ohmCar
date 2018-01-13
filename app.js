@@ -16,13 +16,21 @@ const headers={
 
 let registeredUsers=[
   {userName:'omkar',password:'omkar'},
-  {userName:'ketan',password:'ketan'}
+  {userName:'ketan',password:'ketan'},
 ];
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
   if(req.urlIsOneOf(['/index.html','/createTodo.html']) && !req.user){
     res.redirect('/login.html');
   }
+}
+
+const replaceValueToEdit=(valueToReplace,file,name)=>{
+  file=file.replace(
+    `<input type="text" name="${name}" value="" required/>`,
+    `<input type="text" name="${name}" value="${valueToReplace}" required/>`
+  );
+  return file;
 }
 
 const doesExist=req=>{
@@ -77,6 +85,30 @@ const deleteTodo=(req,res)=>{
     });
     res.redirect('/index.html');
   }
+}
+
+const editTodo=(req,res)=>{
+  todoData.forEach(data=>{
+    if(req.url==`/edit${data.title}`){
+      if(req.method=='GET'){
+        let createTodoFile=fs.readFileSync('./public/createTodo.html').toString();
+        createTodoFile=replaceValueToEdit(data.title,createTodoFile,'title');
+        createTodoFile=replaceValueToEdit(data.description,createTodoFile,'description');
+        createTodoFile=replaceValueToEdit(data.item,createTodoFile,'item');
+        res.write(createTodoFile);
+        res.end();
+      } else{
+        data.title=req.body.title;
+        data.description=req.body.description;
+        data.item=req.body.item;
+        fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+        err=>{
+          if(err)return;
+        });
+        res.redirect('/index.html');
+      }
+    }
+  });
 }
 
 const serveFile=(req,res)=>{
@@ -159,6 +191,7 @@ app.get('/logout',(req,res)=>{
   res.redirect('/login.html');
 });
 
+app.use(editTodo);
 app.use(deleteTodo);
 app.use(showTodo);
 app.use(loadUser);
