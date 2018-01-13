@@ -52,13 +52,15 @@ let loadUser = (req,res)=>{
   }
 };
 
-const showTodo=(req,res)=>{
+const viewTodo=(req,res)=>{
   res.setHeader('Content-type','text/html');
   todoData.forEach(data=>{
     if(req.url==`/${data.title}`){
       res.write(`<p>Title: ${data.title.replace(/\+/g,' ')}</p>`);
       res.write(`<p>Description: ${data.description.replace(/\+/g,' ')}</p>`);
-      res.write(`<p>Todo Items: ${data.item.replace(/\+/g,' ')}</p>`);
+      res.write(
+        `<p>Todo Items: <br/>${data.item.replace(/\+/g,' ')} <a href="/edit${data.item}"> Edit</a></p>`
+      );
       res.write(`<a href="/edit${data.title}"> Edit This Todo </a> <br/>`);
       res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
       res.write(`<a href="/logout"> Logout </a> <br/>`);
@@ -106,6 +108,29 @@ const editTodo=(req,res)=>{
           if(err)return;
         });
         res.redirect('/index.html');
+      }
+    }
+  });
+}
+
+const editTodoItem=(req,res)=>{
+  todoData.forEach(data=>{
+    if(req.url==`/edit${data.item}`){
+      if(req.method=='GET'){
+        res.setHeader('Content-Type','text/html');
+        res.write(
+          `<form method="POST">
+          Edit Todo Item: <input type="text" name="item" value="${data.item}">
+          <input type="submit"></form>`
+        );
+        res.end();
+      } else{
+        data.item=req.body.item;
+        fs.writeFile(`./data/todoData.json`,JSON.stringify(todoData,null,2),
+        err=>{
+          if(err)return;
+        });
+        res.redirect(`/${data.title}`);
       }
     }
   });
@@ -192,8 +217,9 @@ app.get('/logout',(req,res)=>{
 });
 
 app.use(editTodo);
+app.use(editTodoItem);
 app.use(deleteTodo);
-app.use(showTodo);
+app.use(viewTodo);
 app.use(loadUser);
 app.use(redirectNotLoggedInUserToLogin);
 app.use(serveFile);
