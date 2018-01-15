@@ -14,9 +14,9 @@ describe('app',()=>{
       })
     })
   })
-  describe('GET /login.html',()=>{
+  describe('GET /index.html',()=>{
     it('serves the login page',done=>{
-      request(app,{method:'GET',url:'/login.html'},res=>{
+      request(app,{method:'GET',url:'/index.html'},res=>{
         th.status_is_ok(res);
         th.body_contains(res,'Username:');
         th.body_does_not_contain(res,'login failed');
@@ -27,16 +27,15 @@ describe('app',()=>{
   })
 
   describe('POST /login',()=>{
-    it('redirects to indexPage for valid user',done=>{
-      request(app,{method:'POST',url:'/login.html',body:'userName=omkar&password=omkar'},res=>{
-        assert.equal(res.statusCode,302);
-        th.should_be_redirected_to(res,'/index.html');
+    it('gives to homePage for valid user',done=>{
+      request(app,{method:'POST',url:'/index.html',body:'userName=omkar&password=omkar'},res=>{
+        th.status_is_ok(res);
         th.should_not_have_cookie(res,'message');
         done();
       })
     })
     it('gives login page for invalid user with message',done=>{
-      request(app,{method:'POST',url:'/login.html',body:'userName=xyz&password=xyz'},res=>{
+      request(app,{method:'POST',url:'/index.html',body:'userName=xyz&password=xyz'},res=>{
         th.status_is_ok(res);
         th.should_not_have_cookie(res,'message');
         th.body_contains(res,'Wrong');

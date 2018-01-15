@@ -16,18 +16,18 @@ const headers={
 
 let registeredUsers=[
   {userName:'omkar',password:'omkar'},
-  {userName:'ketan',password:'ketan'},
+  {userName:'ketan',password:'ketan'}
 ];
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
-  if(req.urlIsOneOf(['/index.html','/createTodo.html','/']) && !req.user){
-    res.redirect('/login.html');
+  if(req.urlIsOneOf(['/home.html','/createTodo.html','/']) && !req.user){
+    res.redirect('/index.html');
   }
 }
 
 let redirectLoggedinUserToHome = (req,res)=>{
-  if(req.urlIsOneOf(['/login.html','/']) && req.user){
-    res.redirect('/index.html');
+  if(req.urlIsOneOf(['/index.html','/']) && req.user){
+    res.redirect('/home.html');
   }
 }
 
@@ -84,7 +84,7 @@ const checkIfDoneOrNot=(req,res)=>{
         res.redirect(`/${data.title}`);
       }
     }
-  })
+  });
 }
 
 const viewTodo=(req,res)=>{
@@ -108,7 +108,7 @@ const viewTodo=(req,res)=>{
         res.write(`<a href="/edit${data.title}"> Edit This Todo </a> <br/>`);
         res.write(`<a href="/delete${data.title}"> Delete This Todo </a> <br/>`);
         res.write(`<a href="/logout"> Logout </a> <br/>`);
-        res.write(`<a href="/index.html"> Home </a> <br/>`);
+        res.write(`<a href="/home.html"> Home </a> <br/>`);
         res.end();
       }
     }
@@ -129,7 +129,7 @@ const deleteTodo=(req,res)=>{
       return data!=todoToDelete;
     });
     writeData();
-    res.redirect('/index.html');
+    res.redirect('/home.html');
   }
 }
 
@@ -149,7 +149,7 @@ const editTodo=(req,res)=>{
           data.description=req.body.description;
           data.item=req.body.item;
           writeData();
-          res.redirect('/index.html');
+          res.redirect('/home.html');
         }
       }
     }
@@ -178,7 +178,7 @@ const editTodoItem=(req,res)=>{
 
 const serveFile=(req,res)=>{
   try {
-    if(req.urlIsOneOf(['/login.html','/createTodo.html'])){
+    if(req.urlIsOneOf(['/index.html','/createTodo.html'])){
       return;
     }
     if(doesExist(req)){
@@ -191,27 +191,25 @@ const serveFile=(req,res)=>{
   }
 }
 
-app.get('/login.html',(req,res)=>{
+app.get('/index.html',(req,res)=>{
   res.setHeader('Content-type','text/html');
-  res.write(fs.readFileSync('./public/login.html'));
+  res.write(fs.readFileSync('./public/index.html'));
   res.end();
 });
 
-app.post('/login.html',(req,res)=>{
+app.post('/index.html',(req,res)=>{
   let user = registeredUsers.find(u=>{
     return u.userName==req.body.userName && u.password==req.body.password;
   });
-  if(!user){
-    res.setHeader('Set-Cookie',`logInFailed=true`);
-    res.write(`Wrong Username or Password! <br/>`);
-    res.write(fs.readFileSync('./public/login.html'));
-    res.end();
-    return;
-  }
+  res.setHeader('Set-Cookie',`logInFailed=true`);
+  res.write(`Wrong Username or Password! <br/>`);
+  res.write(fs.readFileSync('./public/index.html'));
+  res.end();
+  return;
   let sessionid = new Date().getTime();
   res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
   user.sessionid = sessionid;
-  res.redirect('/index.html');
+  res.redirect('/home.html');
 });
 
 app.get('/createTodo.html',(req,res)=>{
@@ -225,11 +223,11 @@ app.post('/createTodo.html',(req,res)=>{
   req.body.done=false;
   todoData.push(req.body);
   writeData();
-  res.redirect('/index.html');
+  res.redirect('/home.html');
 });
 
-app.get('/index.html',(req,res)=>{
-  let indexPage=fs.readFileSync('./templates/index.html').toString();
+app.get('/home.html',(req,res)=>{
+  let indexPage=fs.readFileSync('./templates/home.html').toString();
   let homePage=indexPage.replace('User',`User : ${req.user.userName}`);
   res.setHeader('Content-type','text/html');
   let user=todoData.find(u=>{
@@ -239,7 +237,7 @@ app.get('/index.html',(req,res)=>{
     res.write(`Your Todo Lists are :<br/>`);
     todoData.forEach(data=>{
       if(data.userName==req.user.userName){
-        res.write(`<a href="/${data.title}">${data.title}</a><br/>`);
+        res.write(`<a href="/${data.title}">${data.title.replace(/\+/,' ')}</a><br/>`);
       };
     });
   }
@@ -252,7 +250,7 @@ app.get('/logout',(req,res)=>{
     res.setHeader('Set-Cookie',[`loginFailed=false,Expires=${new Date(1).toUTCString()}`,`sessionid=0,Expires=${new Date(1).toUTCString()}`]);
     delete req.user.sessionid;
   }
-  res.redirect('/login.html');
+  res.redirect('/index.html');
 });
 
 app.use(checkIfDoneOrNot);
