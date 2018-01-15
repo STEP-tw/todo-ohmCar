@@ -6,7 +6,7 @@ let app = require('../app.js');
 let th = require('./testHelper.js');
 
 describe('app',()=>{
-  describe('GET /bad',()=>{
+  describe('#GET /bad',()=>{
     it('responds with 404',done=>{
       request(app,{method:'GET',url:'/bad'},(res)=>{
         assert.equal(res.statusCode,404);
@@ -14,7 +14,7 @@ describe('app',()=>{
       })
     })
   })
-  describe('GET /index.html',()=>{
+  describe('#GET /index.html',()=>{
     it('serves the login page',done=>{
       request(app,{method:'GET',url:'/index.html'},res=>{
         th.status_is_ok(res);
@@ -26,7 +26,7 @@ describe('app',()=>{
     })
   })
 
-  describe('POST /login',()=>{
+  describe('#POST /login',()=>{
     it('gives to homePage for valid user',done=>{
       request(app,{method:'POST',url:'/index.html',body:'userName=omkar&password=omkar'},res=>{
         th.status_is_ok(res);
@@ -39,6 +39,15 @@ describe('app',()=>{
         th.status_is_ok(res);
         th.should_not_have_cookie(res,'message');
         th.body_contains(res,'Wrong');
+        done();
+      })
+    })
+  })
+  describe('#/',()=>{
+    it('redirects to index page when the url is /',done=>{
+      request(app,{method:'GET',url:'/'},res=>{
+        th.should_be_redirected_to(res,'/index.html');
+        th.should_not_have_cookie(res,'message');
         done();
       })
     })
