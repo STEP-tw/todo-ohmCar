@@ -47,16 +47,30 @@ describe('todo',()=>{
   });
 
   describe('#deleteTodoItems',()=>{
-    it('should add the todoItems',done=>{
+    it('should delete the todoItems',done=>{
       let todo=new Todo(
         'Washing Clothes','need to wash clothes on every sunday',{
-          1:"washing white shirt",
-          2:"washing black shirt"
+          "washing white shirt":"washing white shirt",
+          "washing black shirt":"washing black shirt"
         }
       );
       assert.deepEqual(todo.getAllTodoItems(),["washing white shirt","washing black shirt"]);
-      todo.deleteTodoItem(2);
+      todo.deleteTodoItem("washing black shirt");
       assert.deepEqual(todo.getAllTodoItems(),["washing white shirt"]);
+      done();
+    });
+  });
+
+  describe('#editTodoItem',()=>{
+    it('should edit the todoItems',done=>{
+      let todo=new Todo(
+        'Washing Clothes','need to wash clothes on every sunday',{
+          "washing white shirt":"washing white shirt",
+        }
+      );
+      assert.deepEqual(todo.getAllTodoItems(),["washing white shirt"]);
+      todo.editTodoItem("washing white shirt","washing black shirt");
+      assert.deepEqual(todo.getAllTodoItems(),["washing black shirt"]);
       done();
     });
   });
