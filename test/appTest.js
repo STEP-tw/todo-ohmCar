@@ -52,4 +52,13 @@ describe('app',()=>{
       })
     })
   })
+  describe('#/homePage.html',()=>{
+    it('redirects to index page when the url is /home.html for invalid user',done=>{
+      request(app,{method:'GET',url:'/home.html',body:'userName=xyz&password=xyz'},res=>{
+        th.should_be_redirected_to(res,'/index.html');
+        th.should_not_have_cookie(res,'message');
+        done();
+      })
+    })
+  })
 })
