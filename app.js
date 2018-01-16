@@ -63,8 +63,8 @@ const getHomePage=(req,res)=>{
   let count=1;
   let user=data.find(u=>u.name=req.user.userName);
   let todos='';
-  let titles=user.todos.map(u=>{
-    todos+=`<br/> ${count++}. ${u.title}`;
+  user.todos.map(u=>{
+    todos+=`<br/> ${count++}. ${replaceWithSpace(u.title)}`;
   });
   let homePage=fs.readFileSync('./templates/home.html');
   homePage=homePage.toString().replace(
@@ -111,10 +111,31 @@ const postCreateTodoPage=(req,res)=>{
   res.end();
 }
 
+const viewTodo=(req,res)=>{
+  let user=data.find(u=>u.name==req.user.userName);
+  let title=user.todos.find(todo=>todo.title==req.body.todoTitle);
+  if(!title){
+    res.write('Enter a valid todo title');
+    res.end();
+    return;
+  }
+  let viewTodoPage=fs.readFileSync('./templates/viewTodo.html');
+  viewTodoPage=viewTodoPage.toString().replace('Title',`Title: ${replaceWithSpace(title.title)}`);
+  viewTodoPage=viewTodoPage.toString().replace('description',`Description: ${replaceWithSpace(title.description)}`);
+  viewTodoPage=viewTodoPage.toString().replace('items',`Items: ${replaceWithSpace(title.item)}`);
+  res.write(viewTodoPage);
+  res.end();
+}
+
+const replaceWithSpace=(text)=>{
+  return text.replace(/\+/g,' ');
+}
+
 app.get('/index',getIndexPage);
 app.get('/logout',logoutUser);
 app.get('/home',getHomePage);
 app.get('/createTodo',getCreateTodoPage);
+app.post('/viewTodo',viewTodo);
 app.post('/index',postIndexPage);
 app.post('/createTodo',postCreateTodoPage);
 app.use(loadUser);
