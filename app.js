@@ -72,10 +72,30 @@ const logoutUser=(req,res)=>{
   res.redirect('/index');
 };
 
+const getCreateTodoPage=(req,res)=>{
+  res.write(createTodoPage);
+  res.end();
+}
+
+const postCreateTodoPage=(req,res)=>{
+  req.body.userName=req.user.userName;
+  let item=req.body.item;
+  req.body.item={};
+  req.body.item[item]=item;
+  data.push(req.body);
+  fs.writeFile('./data/data.json',JSON.stringify(data,null,2),err=>{
+    if(err) return;
+  });
+  res.redirect('/home');
+  res.end();
+}
+
 app.get('/index',getIndexPage);
 app.get('/logout',logoutUser);
 app.get('/home',getHomePage);
+app.get('/createTodo',getCreateTodoPage);
 app.post('/index',postIndexPage);
+app.post('/createTodo',postCreateTodoPage);
 app.use(loadUser);
 app.use(redirectLoggedinUserToHome);
 app.use(redirectNotLoggedInUserToLogin);
