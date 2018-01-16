@@ -3,10 +3,6 @@ const fs=require('fs');
 const WebApp = require('./webapp.js');
 let data=require('./data/data.json');
 
-const loginPage=fs.readFileSync('./public/index.html');
-const homePage=fs.readFileSync('./templates/home.html');
-const createTodoPage=fs.readFileSync('./public/createTodo.html');
-
 const User=require('./lib/user.js');
 
 const app=WebApp.create();
@@ -38,12 +34,14 @@ let redirectLoggedinUserToHome = (req,res)=>{
 }
 
 const getIndexPage=(req,res)=>{
+  let loginPage=fs.readFileSync('./public/index.html');
   res.setHeader('Content-type','text/html');
   res.write(loginPage);
   res.end();
 }
 
 const postIndexPage=(req,res)=>{
+  let loginPage=fs.readFileSync('./public/index.html');
   res.setHeader('Content-Type','text/html');
   let user = registeredUsers.find(u=>{
     return u.userName==req.body.userName && u.password==req.body.password;
@@ -62,7 +60,20 @@ const postIndexPage=(req,res)=>{
 }
 
 const getHomePage=(req,res)=>{
-  res.write(homePage.toString().replace('User',`User: ${req.user.userName}`));
+  let count=1;
+  let user=data.find(u=>u.name=req.user.userName);
+  let todos='';
+  let titles=user.todos.map(u=>{
+    todos+=`<br/> ${count++}. ${u.title}`;
+  });
+  let homePage=fs.readFileSync('./templates/home.html');
+  homePage=homePage.toString().replace(
+    'User',`User: ${req.user.userName}`
+  );
+  homePage=homePage.toString().replace(
+    'TodoLists',`Your Todos are: ${todos}`
+  );
+  res.write(homePage);
   res.end();
 }
 
@@ -75,6 +86,7 @@ const logoutUser=(req,res)=>{
 };
 
 const getCreateTodoPage=(req,res)=>{
+  let createTodoPage=fs.readFileSync('./public/createTodo.html');
   res.write(createTodoPage);
   res.end();
 }
