@@ -7,6 +7,8 @@ const loginPage=fs.readFileSync('./public/index.html');
 const homePage=fs.readFileSync('./templates/home.html');
 const createTodoPage=fs.readFileSync('./public/createTodo.html');
 
+const User=require('./lib/user.js');
+
 const app=WebApp.create();
 
 let registeredUsers=[
@@ -24,7 +26,7 @@ let loadUser = (req,res)=>{
 };
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
-  if(req.urlIsOneOf(['/home','/createTodo','/']) && !req.user){
+  if(req.urlIsOneOf(['/home','/createTodo','/','/viewTodo']) && !req.user){
     res.redirect('/index');
   }
 }
@@ -78,11 +80,18 @@ const getCreateTodoPage=(req,res)=>{
 }
 
 const postCreateTodoPage=(req,res)=>{
-  req.body.userName=req.user.userName;
+  let user=data.find(u=>{
+    return u.name==req.user.userName;
+  });
   let item=req.body.item;
-  req.body.item={};
   req.body.item[item]=item;
-  data.push(req.body);
+  if(!user){
+    let user=new User(req.user.userName);
+    user.todos.push(req.body);
+    data.push(user);
+  } else{
+    user.todos.push(req.body);
+  }
   fs.writeFile('./data/data.json',JSON.stringify(data,null,2),err=>{
     if(err) return;
   });
