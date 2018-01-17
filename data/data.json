@@ -3,10 +3,17 @@
     "name": "omkar",
     "todos": [
       {
-        "title": "flowerCatalog",
+        "title": "flower catalog",
         "description": "this todo is for making the flowerCatalog website",
         "todoItems": {
           "item": "handling 404"
+        }
+      },
+      {
+        "title": "washing",
+        "description": "washing my clothes",
+        "todoItems": {
+          "item": "washing white shirt"
         }
       }
     ]

@@ -87,15 +87,21 @@ const getHomePage=(req,res)=>{
 
 const logoutUser=(req,res)=>{
   if(req.user){
-    res.setHeader('Set-Cookie',[`loginFailed=false,Expires=${new Date(1).toUTCString()}`,`sessionid=0,Expires=${new Date(1).toUTCString()}`]);
+    res.setHeader('Set-Cookie',[
+      `loginFailed=false,Expires=${
+        new Date(1).toUTCString()
+      }`,`sessionid=0,Expires=${
+        new Date(1).toUTCString()
+      }`
+    ]);
     delete req.user.sessionid;
   }
   res.redirect('/index');
 };
 
 const getCreateTodoPage=(req,res)=>{
-  let createTodoPage=fs.readFileSync('./public/createTodo.html');
-  res.write(createTodoPage);
+  let createTodo=fs.readFileSync('./public/createTodo.html');
+  res.write(createTodo);
   res.end();
 }
 
@@ -105,7 +111,9 @@ const postCreateTodoPage=(req,res)=>{
   });
   if(!user){
     let user=new User(req.user.userName);
-    user.addTodo(req.body.title,req.body.description,{"item":req.body.item});
+    user.addTodo(req.body.title,req.body.description,{
+      "item":req.body.item
+    });
     data.push(user);
   } else{
     let todo=new Todo(
@@ -121,15 +129,9 @@ const postCreateTodoPage=(req,res)=>{
 const postViewTodo=(req,res)=>{
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.todoTitle);
-  if(!title){
-    res.write('Enter a valid todo title');
-    res.end();
-    return;
-  }
+  if(!title) return wrongTitleMessage(res);
   let viewTodoPage=fs.readFileSync('./templates/viewTodo.html');
-  viewTodoPage=replace(viewTodoPage,'Title',`Title: ${title.title}`);
-  viewTodoPage=replace(viewTodoPage,'description',`Description: ${title.description}`);
-  viewTodoPage=replace(viewTodoPage,'items',`Items: ${title.todoItems.item}`);
+  viewTodoPage=showTodo(viewTodoPage,title);
   res.write(viewTodoPage);
   res.end();
 }
@@ -137,6 +139,13 @@ const postViewTodo=(req,res)=>{
 const getViewTodo=(req,res)=>{
   res.write(fs.readFileSync('./public/viewTodo.html'));
   res.end();
+}
+
+const showTodo=(file,title)=>{
+  file=replace(file,'Title',`Title: ${title.title}`);
+  file=replace(file,'description',`Description: ${title.description}`);
+  file=replace(file,'items',`Items: ${title.todoItems.item}`);
+  return file;
 }
 
 const getDeleteTodo=(req,res)=>{
@@ -147,14 +156,18 @@ const getDeleteTodo=(req,res)=>{
 const postDeleteTodo=(req,res)=>{
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.deleteTodo);
-  if(!title){
-    res.write('Enter a valid todo title');
-    res.end();
-    return;
-  }
+  if(!title) return wrongTitleMessage(res);
   user.todos=user.todos.filter(todo=>todo.title!=req.body.deleteTodo);
   writeData();
   res.redirect('/home');
+}
+
+const replaceValueToEdit=(valueToReplace,file,name)=>{
+  file=file.toString().replace(
+    `<input type="text" name="${name}" value="" required/>`,
+    `<input type="text" name="${name}" value="${valueToReplace}" required/>`
+  );
+  return file;
 }
 
 const getEditTodo=(req,res)=>{
@@ -163,13 +176,21 @@ const getEditTodo=(req,res)=>{
 }
 
 const postEditTodo=(req,res)=>{
+  let createTodo=fs.readFileSync('./public/createTodo.html');
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.editTodo);
-  if(!title){
-    res.write('Enter a valid todo title');
-    res.end();
+  if(req.body.description){
+    let todo=new Todo(
+      req.body.title,req.body.description,{"item":req.body.item}
+    );
+    user.todos.push(todo);
+    writeData();
+    res.redirect('/home');
     return;
-  }
+  } else if(!title) return wrongTitleMessage(res);
+  createTodo=showValuesInEditForm(createTodo,title);
+  user.todos=user.todos.filter(todo=>todo.title!=req.body.editTodo);
+  res.write(createTodo);
   res.end();
 }
 
@@ -179,8 +200,21 @@ const writeData=()=>{
   });
 }
 
+const showValuesInEditForm=(file,title)=>{
+  file=replaceValueToEdit(title.title,file,'title');
+  file=replaceValueToEdit(title.description,file,'description');
+  file=replaceValueToEdit(title.todoItems.item,file,'item');
+  return file;
+}
+
 const replace=(replaceFrom,textToReplace,replaceWith)=>{
   return replaceFrom.toString().replace(textToReplace,replaceWith);
+}
+
+const wrongTitleMessage=(res)=>{
+  res.write('Enter a valid todo title');
+  res.end();
+  return;
 }
 
 app.get('/index',getIndexPage);
