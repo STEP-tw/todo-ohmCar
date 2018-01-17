@@ -4,6 +4,7 @@ const WebApp = require('./webapp.js');
 let data=require('./data/data.json');
 
 const User=require('./lib/user.js');
+const Todo=require('./lib/todo.js');
 
 const app=WebApp.create();
 
@@ -22,7 +23,9 @@ let loadUser = (req,res)=>{
 };
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
-  if(req.urlIsOneOf(['/home','/createTodo','/','/viewTodo']) && !req.user){
+  if(req.urlIsOneOf([
+    '/home','/createTodo','/','/viewTodo','/deleteTodo','/editTodo'
+  ]) && !req.user){
     res.redirect('/index');
   }
 }
@@ -60,16 +63,21 @@ const postIndexPage=(req,res)=>{
 }
 
 const getHomePage=(req,res)=>{
-  let count=1;
-  let user=data.find(u=>u.name=req.user.userName);
-  let todos='';
-  user.todos.map(u=>{
-    todos+=`<br/> ${count++}. ${replaceWithSpace(u.title)}`;
-  });
   let homePage=fs.readFileSync('./templates/home.html');
+  let count=1;
+  let user=data.find(u=>u.name==req.user.userName);
+  let todos='';
   homePage=homePage.toString().replace(
     'User',`User: ${req.user.userName}`
   );
+  if(!user){
+    res.write(homePage);
+    res.end()
+    return;
+  }
+  user.todos.map(u=>{
+    todos+=`<br/> ${count++}. ${u.title}`;
+  });
   homePage=homePage.toString().replace(
     'TodoLists',`Your Todos are: ${todos}`
   );
@@ -95,23 +103,22 @@ const postCreateTodoPage=(req,res)=>{
   let user=data.find(u=>{
     return u.name==req.user.userName;
   });
-  let item=req.body.item;
-  req.body.item[item]=item;
   if(!user){
     let user=new User(req.user.userName);
-    user.todos.push(req.body);
+    user.addTodo(req.body.title,req.body.description,{"item":req.body.item});
     data.push(user);
   } else{
-    user.todos.push(req.body);
+    let todo=new Todo(
+      req.body.title,req.body.description,{"item":req.body.item}
+    );
+    user.todos.push(todo);
   }
-  fs.writeFile('./data/data.json',JSON.stringify(data,null,2),err=>{
-    if(err) return;
-  });
+  writeData();
   res.redirect('/home');
   res.end();
 }
 
-const viewTodo=(req,res)=>{
+const postViewTodo=(req,res)=>{
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.todoTitle);
   if(!title){
@@ -120,22 +127,72 @@ const viewTodo=(req,res)=>{
     return;
   }
   let viewTodoPage=fs.readFileSync('./templates/viewTodo.html');
-  viewTodoPage=viewTodoPage.toString().replace('Title',`Title: ${replaceWithSpace(title.title)}`);
-  viewTodoPage=viewTodoPage.toString().replace('description',`Description: ${replaceWithSpace(title.description)}`);
-  viewTodoPage=viewTodoPage.toString().replace('items',`Items: ${replaceWithSpace(title.item)}`);
+  viewTodoPage=replace(viewTodoPage,'Title',`Title: ${title.title}`);
+  viewTodoPage=replace(viewTodoPage,'description',`Description: ${title.description}`);
+  viewTodoPage=replace(viewTodoPage,'items',`Items: ${title.todoItems.item}`);
   res.write(viewTodoPage);
   res.end();
 }
 
-const replaceWithSpace=(text)=>{
-  return text.replace(/\+/g,' ');
+const getViewTodo=(req,res)=>{
+  res.write(fs.readFileSync('./public/viewTodo.html'));
+  res.end();
+}
+
+const getDeleteTodo=(req,res)=>{
+  res.write(fs.readFileSync('./public/deleteTodo.html'));
+  res.end();
+}
+
+const postDeleteTodo=(req,res)=>{
+  let user=data.find(u=>u.name==req.user.userName);
+  let title=user.todos.find(todo=>todo.title==req.body.deleteTodo);
+  if(!title){
+    res.write('Enter a valid todo title');
+    res.end();
+    return;
+  }
+  user.todos=user.todos.filter(todo=>todo.title!=req.body.deleteTodo);
+  writeData();
+  res.redirect('/home');
+}
+
+const getEditTodo=(req,res)=>{
+  res.write(fs.readFileSync('./public/editTodo.html'));
+  res.end();
+}
+
+const postEditTodo=(req,res)=>{
+  let user=data.find(u=>u.name==req.user.userName);
+  let title=user.todos.find(todo=>todo.title==req.body.editTodo);
+  if(!title){
+    res.write('Enter a valid todo title');
+    res.end();
+    return;
+  }
+  res.end();
+}
+
+const writeData=()=>{
+  fs.writeFile('./data/data.json',JSON.stringify(data,null,2),err=>{
+    if(err) return;
+  });
+}
+
+const replace=(replaceFrom,textToReplace,replaceWith)=>{
+  return replaceFrom.toString().replace(textToReplace,replaceWith);
 }
 
 app.get('/index',getIndexPage);
 app.get('/logout',logoutUser);
 app.get('/home',getHomePage);
 app.get('/createTodo',getCreateTodoPage);
-app.post('/viewTodo',viewTodo);
+app.get('/viewTodo',getViewTodo);
+app.get('/deleteTodo',getDeleteTodo);
+app.get('/editTodo',getEditTodo);
+app.post('/viewTodo',postViewTodo);
+app.post('/deleteTodo',postDeleteTodo);
+app.post('/editTodo',postEditTodo);
 app.post('/index',postIndexPage);
 app.post('/createTodo',postCreateTodoPage);
 app.use(loadUser);

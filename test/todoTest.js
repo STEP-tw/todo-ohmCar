@@ -61,6 +61,34 @@ describe('todo',()=>{
     });
   });
 
+  describe('#editTitle',()=>{
+    it('should edit the title of todo',done=>{
+      let todo=new Todo(
+        'Washing Clothes','need to wash clothes on every sunday',{
+          "washing white shirt":"washing white shirt",
+          "washing black shirt":"washing black shirt"
+        }
+      );
+      todo.editTitle('Washing');
+      assert.equal(todo.title,"Washing");
+      done();
+    });
+  });
+
+  describe('#editDescription',()=>{
+    it('should edit the description of todo',done=>{
+      let todo=new Todo(
+        'Washing Clothes','need to wash clothes on every sunday',{
+          "washing white shirt":"washing white shirt",
+          "washing black shirt":"washing black shirt"
+        }
+      );
+      todo.editDescription('washing my clothes');
+      assert.equal(todo.description,"washing my clothes");
+      done();
+    });
+  })
+
   describe('#editTodoItem',()=>{
     it('should edit the todoItems',done=>{
       let todo=new Todo(

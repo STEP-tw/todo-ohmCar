@@ -113,4 +113,13 @@ describe('app',()=>{
     })
   })
 
+  describe('#/deleteTodo',()=>{
+    it('redirects to index page when user is not loggedin',done=>{
+      request(app,{method:'GET',url:'/deleteTodo'},res=>{
+        th.should_be_redirected_to(res,'/index');
+        done();
+      })
+    })
+  })
+
 })

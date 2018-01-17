@@ -3,9 +3,11 @@
     "name": "omkar",
     "todos": [
       {
-        "title": "hello",
-        "description": "this+is+a+hello+text",
-        "item": "hello+hi"
+        "title": "flowerCatalog",
+        "description": "this todo is for making the flowerCatalog website",
+        "todoItems": {
+          "item": "handling 404"
+        }
       }
     ]
   },
@@ -13,9 +15,11 @@
     "name": "ketan",
     "todos": [
       {
-        "title": "sdfgh",
-        "description": "fgd",
-        "item": "sdfg"
+        "title": "todo",
+        "description": "this todo is for making the todo app",
+        "todoItems": {
+          "item": "feature to view todo"
+        }
       }
     ]
   }
