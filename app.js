@@ -24,14 +24,14 @@ let loadUser = (req,res)=>{
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
   if(req.urlIsOneOf([
-    '/home','/createTodo','/','/viewTodo','/deleteTodo','/editTodo'
+    '/home','/createTodo','/','/viewTodo','/deleteTodo','/editTodo','/login'
   ]) && !req.user){
     res.redirect('/index');
   }
 }
 
 let redirectLoggedinUserToHome = (req,res)=>{
-  if(req.urlIsOneOf(['/index','/']) && req.user){
+  if(req.urlIsOneOf(['/index','/','/login']) && req.user){
     res.redirect('/home');
   }
 }
@@ -129,14 +129,15 @@ const postCreateTodoPage=(req,res)=>{
 const postViewTodo=(req,res)=>{
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.todoTitle);
-  if(!title) return wrongTitleMessage(res);
   let viewTodoPage=fs.readFileSync('./templates/viewTodo.html');
   viewTodoPage=showTodo(viewTodoPage,title);
+  if(!title) return wrongTitleMessage(res);
   res.write(viewTodoPage);
   res.end();
 }
 
 const getViewTodo=(req,res)=>{
+  displayTodoList(req,res);
   res.write(fs.readFileSync('./public/viewTodo.html'));
   res.end();
 }
@@ -149,6 +150,7 @@ const showTodo=(file,title)=>{
 }
 
 const getDeleteTodo=(req,res)=>{
+  displayTodoList(req,res);
   res.write(fs.readFileSync('./public/deleteTodo.html'));
   res.end();
 }
@@ -171,6 +173,7 @@ const replaceValueToEdit=(valueToReplace,file,name)=>{
 }
 
 const getEditTodo=(req,res)=>{
+  displayTodoList(req,res);
   res.write(fs.readFileSync('./public/editTodo.html'));
   res.end();
 }
@@ -198,6 +201,20 @@ const writeData=()=>{
   fs.writeFile('./data/data.json',JSON.stringify(data,null,2),err=>{
     if(err) return;
   });
+}
+
+const displayTodoList=(req,res)=>{
+  let count=1;
+  let todos='';
+  let todoList=fs.readFileSync('./templates/todoList.html').toString();
+  let user=data.find(u=>u.name==req.user.userName);
+  user.todos.map(u=>{
+    todos+=`<br/> ${count++}. ${u.title}`;
+  });
+  todoList=todoList.toString().replace(
+    'TodoLists',`Your Todos are: ${todos}`
+  );
+  res.write(todoList);
 }
 
 const showValuesInEditForm=(file,title)=>{
