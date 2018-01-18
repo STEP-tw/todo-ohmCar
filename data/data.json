@@ -5,28 +5,26 @@
       {
         "title": "flower catalog",
         "description": "this todo is for making the flowerCatalog website",
-        "todoItems": {
-          "item": "handling 404"
-        }
+        "todoItems": [
+          {
+            "1": "handling 404",
+            "status": false
+          }
+        ]
       },
       {
         "title": "washing",
-        "description": "washing my clothes",
-        "todoItems": {
-          "item": "washing white shirt"
-        }
-      }
-    ]
-  },
-  {
-    "name": "ketan",
-    "todos": [
-      {
-        "title": "todo",
-        "description": "this todo is for making the todo app",
-        "todoItems": {
-          "item": "feature to view todo"
-        }
+        "description": "washing clothes on sunday",
+        "todoItems": [
+          {
+            "1": "washing white shirt",
+            "status": false
+          },
+          {
+            "2": "washing black shirt",
+            "status": false
+          }
+        ]
       }
     ]
   }

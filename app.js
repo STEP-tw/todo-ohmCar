@@ -10,7 +10,9 @@ const app=WebApp.create();
 
 let registeredUsers=[
   {userName:'omkar',password:'omkar'},
-  {userName:'ketan',password:'ketan'}
+  {userName:'ketan',password:'ketan'},
+  {userName:'viraj',password:'viraj'},
+  {userName:'harshad',password:'harshad'},
 ];
 
 let loadUser = (req,res)=>{
@@ -24,7 +26,7 @@ let loadUser = (req,res)=>{
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
   if(req.urlIsOneOf([
-    '/home','/createTodo','/','/viewTodo','/deleteTodo','/editTodo','/login'
+    '/home','/createTodo','/','/viewTodo','/deleteTodo','/editTodo','/login','/addItem'
   ]) && !req.user){
     res.redirect('/index');
   }
@@ -109,16 +111,16 @@ const postCreateTodoPage=(req,res)=>{
   let user=data.find(u=>{
     return u.name==req.user.userName;
   });
+  let id=1;
+  let obj={};
+  obj[id++]=req.body.item;
+  obj["status"]=false;
   if(!user){
     let user=new User(req.user.userName);
-    user.addTodo(req.body.title,req.body.description,{
-      "item":req.body.item
-    });
+    user.addTodo(req.body.title,req.body.description,[obj]);
     data.push(user);
   } else{
-    let todo=new Todo(
-      req.body.title,req.body.description,{"item":req.body.item}
-    );
+    let todo=new Todo(req.body.title,req.body.description,[obj]);
     user.todos.push(todo);
   }
   writeData();
@@ -129,9 +131,9 @@ const postCreateTodoPage=(req,res)=>{
 const postViewTodo=(req,res)=>{
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.todoTitle);
+  if(!title) return wrongTitleMessage(res);
   let viewTodoPage=fs.readFileSync('./templates/viewTodo.html');
   viewTodoPage=showTodo(viewTodoPage,title);
-  if(!title) return wrongTitleMessage(res);
   res.write(viewTodoPage);
   res.end();
 }
@@ -143,9 +145,14 @@ const getViewTodo=(req,res)=>{
 }
 
 const showTodo=(file,title)=>{
+  let id=1;
+  let items='';
   file=replace(file,'Title',`Title: ${title.title}`);
   file=replace(file,'description',`Description: ${title.description}`);
-  file=replace(file,'items',`Items: ${title.todoItems.item}`);
+  title.todoItems.forEach(item=>{
+    items+=`${id}. ${item[id++]} <br/> `
+  });
+  file=replace(file,'items',`Items: <br/>${items}`);
   return file;
 }
 
@@ -178,19 +185,19 @@ const getEditTodo=(req,res)=>{
   res.end();
 }
 
+let allItems;
 const postEditTodo=(req,res)=>{
   let createTodo=fs.readFileSync('./public/createTodo.html');
   let user=data.find(u=>u.name==req.user.userName);
   let title=user.todos.find(todo=>todo.title==req.body.editTodo);
   if(req.body.description){
-    let todo=new Todo(
-      req.body.title,req.body.description,{"item":req.body.item}
-    );
+    let todo=new Todo(req.body.title,req.body.description,allItems);
     user.todos.push(todo);
     writeData();
     res.redirect('/home');
     return;
   } else if(!title) return wrongTitleMessage(res);
+  allItems=title.todoItems;
   createTodo=showValuesInEditForm(createTodo,title);
   user.todos=user.todos.filter(todo=>todo.title!=req.body.editTodo);
   res.write(createTodo);
@@ -220,7 +227,7 @@ const displayTodoList=(req,res)=>{
 const showValuesInEditForm=(file,title)=>{
   file=replaceValueToEdit(title.title,file,'title');
   file=replaceValueToEdit(title.description,file,'description');
-  file=replaceValueToEdit(title.todoItems.item,file,'item');
+  file=replace(file,'TODO Item:<input type="text" name="item" value="" required/>','');
   return file;
 }
 
@@ -234,6 +241,36 @@ const wrongTitleMessage=(res)=>{
   return;
 }
 
+const getAddItem=(req,res)=>{
+  displayTodoList(req,res);
+  res.write(fs.readFileSync('./public/addItem.html'));
+  res.end();
+}
+
+const postAddItem=(req,res)=>{
+  let user=data.find(u=>u.name==req.user.userName);
+  let title=user.todos.find(todo=>todo.title==req.body.title);
+  if(!title) return wrongTitleMessage(res);
+  let id=1;
+  let arrayOfItems=[];
+  let obj={};
+  title.todoItems.forEach(item=>{
+    obj[id]=item[id++];
+    obj['status']=false;
+    arrayOfItems.push(obj);
+    obj={};
+  });
+  obj[id++]=req.body.item;
+  obj["status"]=false;
+  arrayOfItems.push(obj);
+  user.todos=user.todos.filter(todo=>todo.title!=req.body.title);
+  let todo=new Todo(title.title,title.description,arrayOfItems);
+  user.todos.push(todo);
+  writeData(res);
+  res.redirect('/home');
+  res.end();
+}
+
 app.get('/index',getIndexPage);
 app.get('/logout',logoutUser);
 app.get('/home',getHomePage);
@@ -241,11 +278,13 @@ app.get('/createTodo',getCreateTodoPage);
 app.get('/viewTodo',getViewTodo);
 app.get('/deleteTodo',getDeleteTodo);
 app.get('/editTodo',getEditTodo);
+app.get('/addItem',getAddItem);
 app.post('/viewTodo',postViewTodo);
 app.post('/deleteTodo',postDeleteTodo);
 app.post('/editTodo',postEditTodo);
 app.post('/index',postIndexPage);
 app.post('/createTodo',postCreateTodoPage);
+app.post('/addItem',postAddItem);
 app.use(loadUser);
 app.use(redirectLoggedinUserToHome);
 app.use(redirectNotLoggedInUserToLogin);
