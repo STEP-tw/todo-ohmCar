@@ -23,6 +23,10 @@
           {
             "2": "washing black shirt",
             "status": false
+          },
+          {
+            "3": "washing green shirt",
+            "status": false
           }
         ]
       }

@@ -8,6 +8,21 @@ const Todo=require('./lib/todo.js');
 
 const app=WebApp.create();
 
+const timeStamp = require('./time.js').timeStamp;
+let toS = o=>JSON.stringify(o,null,2);
+
+let logRequest = (req,res)=>{
+  let text = ['------------------------------',
+    `${timeStamp()}`,
+    `${req.method} ${req.url}`,
+    `HEADERS=> ${toS(req.headers)}`,
+    `COOKIES=> ${toS(req.cookies)}`,
+    `BODY=> ${toS(req.body)}`,''].join('\n');
+  fs.appendFile('request.log',text,()=>{});
+
+  console.log(`${req.method} ${req.url}`);
+}
+
 let registeredUsers=[
   {userName:'omkar',password:'omkar'},
   {userName:'ketan',password:'ketan'},
@@ -26,7 +41,8 @@ let loadUser = (req,res)=>{
 
 let redirectNotLoggedInUserToLogin = (req,res)=>{
   if(req.urlIsOneOf([
-    '/home','/createTodo','/','/viewTodo','/deleteTodo','/editTodo','/login','/addItem'
+    '/home','/createTodo','/','/viewTodo','/editItem',
+    '/deleteTodo','/editTodo','/login','/addItem'
   ]) && !req.user){
     res.redirect('/index');
   }
@@ -271,6 +287,26 @@ const postAddItem=(req,res)=>{
   res.end();
 }
 
+const getEditItem=(req,res)=>{
+  displayTodoList(req,res);
+  res.write(fs.readFileSync('./public/editItem.html'));
+  res.end();
+}
+
+const postEditItem=(req,res)=>{
+  let user=data.find(u=>u.name==req.user.userName);
+  let title=user.todos.find(todo=>todo.title==req.body.title);
+  if(!title) return wrongTitleMessage(res);
+  let id=1;
+  res.setHeader('Content-type','text/html');
+  res.write(`<p>Edit Items:</p>`);
+  title.todoItems.forEach(item=>{
+    res.write(`<input type="text" value="${item[id]}" name="${item[id++]}" required/><br/><br/>`);
+  });
+  res.write(`<input type="submit" value="Save"/>`);
+  res.end();
+}
+
 app.get('/index',getIndexPage);
 app.get('/logout',logoutUser);
 app.get('/home',getHomePage);
@@ -279,13 +315,16 @@ app.get('/viewTodo',getViewTodo);
 app.get('/deleteTodo',getDeleteTodo);
 app.get('/editTodo',getEditTodo);
 app.get('/addItem',getAddItem);
+app.get('/editItem',getEditItem);
 app.post('/viewTodo',postViewTodo);
 app.post('/deleteTodo',postDeleteTodo);
 app.post('/editTodo',postEditTodo);
 app.post('/index',postIndexPage);
 app.post('/createTodo',postCreateTodoPage);
 app.post('/addItem',postAddItem);
+app.post('/editItem',postEditItem);
 app.use(loadUser);
+app.use(logRequest);
 app.use(redirectLoggedinUserToHome);
 app.use(redirectNotLoggedInUserToLogin);
 
