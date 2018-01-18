@@ -18,7 +18,7 @@
         "todoItems": [
           {
             "1": "washing white shirt",
-            "status": false
+            "status": true
           },
           {
             "2": "washing black shirt",

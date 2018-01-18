@@ -2,47 +2,49 @@ const WebApp = require('./webapp.js');
 
 const app=WebApp.create();
 
-const getIndexPage=require('./utils.js').getIndexPage;
-const logoutUser=require('./utils.js').logoutUser;
-const getHomePage=require('./utils.js').getHomePage;
-const getCreateTodoPage=require('./utils.js').getCreateTodoPage;
-const getViewTodo=require('./utils.js').getViewTodo;
-const getDeleteTodo=require('./utils.js').getDeleteTodo;
-const getEditTodo=require('./utils.js').getEditTodo;
-const getAddItem=require('./utils.js').getAddItem;
-const getEditItem=require('./utils.js').getEditItem;
+const utils=require('./utils.js');
 
-const postViewTodo=require('./utils.js').postViewTodo;
-const postDeleteTodo=require('./utils.js').postDeleteTodo;
-const postEditTodo=require('./utils.js').postEditTodo;
-const postIndexPage=require('./utils.js').postIndexPage;
-const postCreateTodoPage=require('./utils.js').postCreateTodoPage;
-const postEditItem=require('./utils.js').postEditItem;
-const postAddItem=require('./utils.js').postAddItem;
+const logoutUser=utils.logoutUser;
+const getAddItem=utils.getAddItem;
+const getHomePage=utils.getHomePage;
+const getViewTodo=utils.getViewTodo;
+const getEditTodo=utils.getEditTodo;
+const getEditItem=utils.getEditItem;
+const getIndexPage=utils.getIndexPage;
+const getDeleteTodo=utils.getDeleteTodo;
+const getCreateTodoPage=utils.getCreateTodoPage;
 
-const loadUser=require('./utils.js').loadUser;
-const logRequest=require('./utils.js').logRequest;
-const redirectLoggedinUserToHome=require('./utils.js').redirectLoggedinUserToHome;
-const redirectNotLoggedInUserToLogin=require('./utils.js').redirectNotLoggedInUserToLogin;
+const postViewTodo=utils.postViewTodo;
+const postDeleteTodo=utils.postDeleteTodo;
+const postEditTodo=utils.postEditTodo;
+const postIndexPage=utils.postIndexPage;
+const postCreateTodoPage=utils.postCreateTodoPage;
+const postEditItem=utils.postEditItem;
+const postAddItem=utils.postAddItem;
+
+const loadUser=utils.loadUser;
+const logRequest=utils.logRequest;
+const redirectLoggedinUserToHome=utils.redirectLoggedinUserToHome;
+const redirectNotLoggedInUserToLogin=utils.redirectNotLoggedInUserToLogin;
 
 
-app.get('/index',getIndexPage);
-app.get('/logout',logoutUser);
 app.get('/home',getHomePage);
-app.get('/createTodo',getCreateTodoPage);
-app.get('/viewTodo',getViewTodo);
-app.get('/deleteTodo',getDeleteTodo);
-app.get('/editTodo',getEditTodo);
+app.get('/logout',logoutUser);
+app.get('/index',getIndexPage);
 app.get('/addItem',getAddItem);
+app.get('/viewTodo',getViewTodo);
+app.get('/editTodo',getEditTodo);
 app.get('/editItem',getEditItem);
+app.get('/deleteTodo',getDeleteTodo);
+app.get('/createTodo',getCreateTodoPage);
 
-app.post('/viewTodo',postViewTodo);
-app.post('/deleteTodo',postDeleteTodo);
-app.post('/editTodo',postEditTodo);
 app.post('/index',postIndexPage);
-app.post('/createTodo',postCreateTodoPage);
 app.post('/addItem',postAddItem);
+app.post('/viewTodo',postViewTodo);
+app.post('/editTodo',postEditTodo);
 app.post('/editItem',postEditItem);
+app.post('/deleteTodo',postDeleteTodo);
+app.post('/createTodo',postCreateTodoPage);
 
 app.use(loadUser);
 app.use(logRequest);

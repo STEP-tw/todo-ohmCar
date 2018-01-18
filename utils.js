@@ -8,6 +8,14 @@ const Todo=require('./lib/todo.js');
 
 const timeStamp = require('./time.js').timeStamp;
 let toS = o=>JSON.stringify(o,null,2);
+let allItems;
+
+let registeredUsers=[
+  {userName:'omkar',password:'omkar'},
+  {userName:'ketan',password:'ketan'},
+  {userName:'viraj',password:'viraj'},
+  {userName:'harshad',password:'harshad'},
+];
 
 exports.logRequest = (req,res)=>{
   let text = ['------------------------------',
@@ -21,13 +29,6 @@ exports.logRequest = (req,res)=>{
   console.log(`${req.method} ${req.url}`);
 }
 
-let registeredUsers=[
-  {userName:'omkar',password:'omkar'},
-  {userName:'ketan',password:'ketan'},
-  {userName:'viraj',password:'viraj'},
-  {userName:'harshad',password:'harshad'},
-];
-
 exports.loadUser = (req,res)=>{
   let sessionid = req.cookies.sessionid;
   let users = JSON.stringify(registeredUsers);
@@ -36,21 +37,6 @@ exports.loadUser = (req,res)=>{
     req.user = user;
   }
 };
-
-exports.redirectNotLoggedInUserToLogin = (req,res)=>{
-  if(req.urlIsOneOf([
-    '/home','/createTodo','/','/viewTodo','/editItem',
-    '/deleteTodo','/editTodo','/login','/addItem'
-  ]) && !req.user){
-    res.redirect('/index');
-  }
-}
-
-exports.redirectLoggedinUserToHome = (req,res)=>{
-  if(req.urlIsOneOf(['/index','/','/login']) && req.user){
-    res.redirect('/home');
-  }
-}
 
 exports.getIndexPage=(req,res)=>{
   let loginPage=fs.readFileSync('./public/index.html');
@@ -158,18 +144,6 @@ exports.getViewTodo=(req,res)=>{
   res.end();
 }
 
-const showTodo=(file,title)=>{
-  let id=1;
-  let items='';
-  file=replace(file,'Title',`Title: ${title.title}`);
-  file=replace(file,'description',`Description: ${title.description}`);
-  title.todoItems.forEach(item=>{
-    items+=`${id}. ${item[id++]} <br/> `
-  });
-  file=replace(file,'items',`Items: <br/>${items}`);
-  return file;
-}
-
 exports.getDeleteTodo=(req,res)=>{
   displayTodoList(req,res);
   res.write(fs.readFileSync('./public/deleteTodo.html'));
@@ -185,21 +159,12 @@ exports.postDeleteTodo=(req,res)=>{
   res.redirect('/home');
 }
 
-const replaceValueToEdit=(valueToReplace,file,name)=>{
-  file=file.toString().replace(
-    `<input type="text" name="${name}" value="" required/>`,
-    `<input type="text" name="${name}" value="${valueToReplace}" required/>`
-  );
-  return file;
-}
-
 exports.getEditTodo=(req,res)=>{
   displayTodoList(req,res);
   res.write(fs.readFileSync('./public/editTodo.html'));
   res.end();
 }
 
-let allItems;
 exports.postEditTodo=(req,res)=>{
   let createTodo=fs.readFileSync('./public/createTodo.html');
   let user=data.find(u=>u.name==req.user.userName);
@@ -276,11 +241,47 @@ exports.postEditItem=(req,res)=>{
   res.end();
 }
 
+exports.redirectLoggedinUserToHome = (req,res)=>{
+  if(req.urlIsOneOf(['/index','/','/login']) && req.user){
+    res.redirect('/home');
+  }
+}
+
+exports.redirectNotLoggedInUserToLogin = (req,res)=>{
+  if(req.urlIsOneOf([
+    '/home','/createTodo','/','/viewTodo','/editItem',
+    '/deleteTodo','/editTodo','/login','/addItem'
+  ]) && !req.user){
+    res.redirect('/index');
+  }
+}
 
 const writeData=()=>{
   fs.writeFile('./data/data.json',JSON.stringify(data,null,2),err=>{
     if(err) return;
   });
+}
+
+const showTodo=(file,title)=>{
+  let id=1;
+  let items='';
+  file=replace(file,'Title',`Title: ${title.title}`);
+  file=replace(file,'description',`Description: ${title.description}`);
+  title.todoItems.forEach(item=>{
+    if(item.status==true){
+      items+=`<input type="checkbox" checked> ${item[id++]} <br/> `
+    }else{
+      items+=`<input type="checkbox"> ${item[id++]} <br/> `
+    }
+  });
+  file=replace(file,'items',`Items: <br/>${items}`);
+  return file;
+}
+
+const wrongTitleMessage=(res)=>{
+  res.write('Enter a valid todo title');
+  res.end();
+  return;
 }
 
 const displayTodoList=(req,res)=>{
@@ -304,12 +305,14 @@ const showValuesInEditForm=(file,title)=>{
   return file;
 }
 
-const replace=(replaceFrom,textToReplace,replaceWith)=>{
-  return replaceFrom.toString().replace(textToReplace,replaceWith);
+const replaceValueToEdit=(valueToReplace,file,name)=>{
+  file=file.toString().replace(
+    `<input type="text" name="${name}" value="" required/>`,
+    `<input type="text" name="${name}" value="${valueToReplace}" required/>`
+  );
+  return file;
 }
 
-const wrongTitleMessage=(res)=>{
-  res.write('Enter a valid todo title');
-  res.end();
-  return;
+const replace=(replaceFrom,textToReplace,replaceWith)=>{
+  return replaceFrom.toString().replace(textToReplace,replaceWith);
 }
