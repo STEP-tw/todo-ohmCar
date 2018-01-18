@@ -2,30 +2,30 @@ const WebApp = require('./webapp.js');
 
 const app=WebApp.create();
 
-const utils=require('./utils.js');
+const utility=require('./utility.js');
 
-const logoutUser=utils.logoutUser;
-const getAddItem=utils.getAddItem;
-const getHomePage=utils.getHomePage;
-const getViewTodo=utils.getViewTodo;
-const getEditTodo=utils.getEditTodo;
-const getEditItem=utils.getEditItem;
-const getIndexPage=utils.getIndexPage;
-const getDeleteTodo=utils.getDeleteTodo;
-const getCreateTodoPage=utils.getCreateTodoPage;
+const logoutUser=utility.logoutUser;
+const getAddItem=utility.getAddItem;
+const getHomePage=utility.getHomePage;
+const getViewTodo=utility.getViewTodo;
+const getEditTodo=utility.getEditTodo;
+const getEditItem=utility.getEditItem;
+const getIndexPage=utility.getIndexPage;
+const getDeleteTodo=utility.getDeleteTodo;
+const getCreateTodoPage=utility.getCreateTodoPage;
 
-const postViewTodo=utils.postViewTodo;
-const postDeleteTodo=utils.postDeleteTodo;
-const postEditTodo=utils.postEditTodo;
-const postIndexPage=utils.postIndexPage;
-const postCreateTodoPage=utils.postCreateTodoPage;
-const postEditItem=utils.postEditItem;
-const postAddItem=utils.postAddItem;
+const postViewTodo=utility.postViewTodo;
+const postDeleteTodo=utility.postDeleteTodo;
+const postEditTodo=utility.postEditTodo;
+const postIndexPage=utility.postIndexPage;
+const postCreateTodoPage=utility.postCreateTodoPage;
+const postEditItem=utility.postEditItem;
+const postAddItem=utility.postAddItem;
 
-const loadUser=utils.loadUser;
-const logRequest=utils.logRequest;
-const redirectLoggedinUserToHome=utils.redirectLoggedinUserToHome;
-const redirectNotLoggedInUserToLogin=utils.redirectNotLoggedInUserToLogin;
+const loadUser=utility.loadUser;
+const logRequest=utility.logRequest;
+const redirectLoggedinUserToHome=utility.redirectLoggedinUserToHome;
+const redirectNotLoggedInUserToLogin=utility.redirectNotLoggedInUserToLogin;
 
 
 app.get('/home',getHomePage);
